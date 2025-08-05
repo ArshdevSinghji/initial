@@ -1,0 +1,7 @@
+DB_HOST=postgres
+DB_PORT=5432
+DB_USERNAME=todo
+DB_PASSWORD=todo
+DB_DATABASE=todo_db
+
+JWT_SECRET_KEY=ThisIsASecretKey
