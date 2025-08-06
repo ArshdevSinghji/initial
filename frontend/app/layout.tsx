@@ -1,5 +1,9 @@
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "sonner";
+import StoreProvider from "./store-provider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,8 +16,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html>
+      <body>
+        <AppRouterCacheProvider>
+          <StoreProvider>{children}</StoreProvider>
+          <Toaster theme="dark" position="top-right" />
+        </AppRouterCacheProvider>
+      </body>
     </html>
   );
 }

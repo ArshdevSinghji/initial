@@ -1,9 +1,9 @@
-export enum RecipeCategory {
-  MAIN = "MAIN",
-  BREAKFAST = "BREAKFAST",
-  SALAD = "SALAD",
-  SOUP = "SOUP",
-  SNACK = "SNACK",
-  DESSERT = "DESSERT",
-  DRINK = "DRINK",
+export enum FeedbackStatus {
+  PRIVATE = "Private",
+  PUBLIC = "Public",
+}
+
+export enum VoteType {
+  UPVOTE = "Upvote",
+  DOWNVOTE = "Downvote",
 }

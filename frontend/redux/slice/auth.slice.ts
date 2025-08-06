@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { signInThunk, signUpThunk } from "../thunk/authentication.thunk";
 
 interface User {
-  uid: number;
+  id: number;
   username: string;
   email: string;
 }

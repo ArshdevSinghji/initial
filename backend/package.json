@@ -23,8 +23,8 @@
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
-    "seed:run": "npm run seed:run -d dist/data-source.js",
-    "seed:revert": "npm run seed:revert -d dist/data-source.js"
+    "seed:run": "npm run build && npx typeorm-extension seed:run -d dist/data-source.js",
+    "seed:revert": "npm run build && npx typeorm-extension seed:revert -d dist/data-source.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

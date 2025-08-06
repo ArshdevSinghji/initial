@@ -10,11 +10,6 @@ export const signInThunk = createAsyncThunk(
   async (signInPayload: SignInPayloadInterface, thunkAPI) => {
     try {
       const res = await axiosInstance.post("auth/signIn", signInPayload);
-
-      if (res.data.accessToken) {
-        localStorage.setItem("token", res.data.accessToken);
-      }
-
       return res.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || "Sign in failed");
@@ -27,7 +22,6 @@ export const signUpThunk = createAsyncThunk(
   async (signUpPayload: SignUpPayloadInterface, thunkAPI) => {
     try {
       const res = await axiosInstance.post("auth/signUp", signUpPayload);
-
       return res.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || "Sign up failed");

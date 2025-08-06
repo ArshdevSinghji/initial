@@ -22,7 +22,7 @@ export const modal = {
   p: 4,
 };
 
-export const addRecipeButton = {
+export const addButton = {
   position: "fixed",
   bottom: 32,
   right: 32,

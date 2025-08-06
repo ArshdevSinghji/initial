@@ -23,7 +23,7 @@ function Navbar() {
 
   const accessToken = document.cookie
     .split("; ")
-    .find((row) => row.startsWith("accessToken="))
+    .find((row) => row.startsWith("token="))
     ?.split("=")[1];
 
   return (
@@ -41,26 +41,13 @@ function Navbar() {
               <MenuIcon />
             </IconButton>
           </Box>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            <Tooltip title={!accessToken ? "Login to access Favorites" : ""}>
-              <span>
-                <Button
-                  sx={{ my: 2, color: "white", display: "block" }}
-                  disabled={!accessToken}
-                  onClick={() => router.push("/favorites")}
-                >
-                  Favorites
-                </Button>
-              </span>
-            </Tooltip>
-          </Box>
           <Box sx={{ flexGrow: 0 }}>
             {accessToken ? (
               <Tooltip title="Logout">
                 <Button
                   sx={{ color: "white" }}
                   onClick={() => {
-                    document.cookie = "accessToken=; Max-Age=0; path=/;";
+                    document.cookie = "token=; Max-Age=0; path=/;";
                     dispatch(logout());
                     window.location.reload();
                   }}

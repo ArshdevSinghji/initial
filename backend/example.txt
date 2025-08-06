@@ -1,7 +1,9 @@
 DB_HOST=postgres
 DB_PORT=5432
-DB_USERNAME=todo
-DB_PASSWORD=todo
-DB_DATABASE=todo_db
+DB_USERNAME=eval
+DB_PASSWORD=eval
+DB_DATABASE=eval_db
 
-JWT_SECRET_KEY=ThisIsASecretKey
+JWT_SECRET_KEY=This1sSec:*et|<eY
+
+frontend=http://localhost:3000

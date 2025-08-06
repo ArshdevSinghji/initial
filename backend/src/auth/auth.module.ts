@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { HashModule } from 'src/hash/hash.module';
+import { UserRepository } from 'src/repository/user.repository';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { HashModule } from 'src/hash/hash.module';
     HashModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, UserRepository],
 })
 export class AuthModule {}
