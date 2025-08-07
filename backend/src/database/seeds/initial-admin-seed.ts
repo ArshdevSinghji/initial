@@ -1,4 +1,5 @@
 import { User } from 'src/user/entities/user.entity';
+import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 
@@ -19,7 +20,7 @@ export class InitialCustomerData implements Seeder {
       {
         email: 'johnSnow@example.com',
         username: 'John Snow',
-        password: 'kingInTheNorth',
+        password: await bcrypt.hash('kingInTheNorth', 10),
         isAdmin: true,
       },
     ];
