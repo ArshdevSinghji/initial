@@ -52,8 +52,6 @@ const Home = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { users } = useAppSelector((state) => state.searchUser);
 
-  if (!user) return null;
-
   const {
     control,
     register,
@@ -290,124 +288,135 @@ const Home = () => {
 
       <Box>
         {feedbacks.length > 0 ? (
-          feedbacks.map((feedback) => {
-            // if (
-            //   feedback.status === FeedbackStatus.PRIVATE &&
-            //   feedback.author.id !== user.id
-            // ) {
-            //   return <></>;
-            // }
-            return (
-              <Paper
-                variant="outlined"
-                key={feedback.id}
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  "&:hover": { boxShadow: 3, cursor: "pointer" },
-                  position: "relative",
-                }}
-                onClick={() => {
-                  router.push(`/home/${feedback.id}`);
-                }}
-              >
-                <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                  <Avatar />
-                  <Box>
-                    <Typography variant="subtitle1">
-                      {feedback.author.username}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {feedback.author.email}
-                    </Typography>
-                  </Box>
-                </Stack>
-                <Typography variant="h6">{feedback.title}</Typography>
-                <Typography variant="body2">{feedback.description}</Typography>
-                <Stack direction="row" spacing={1} mt={1}>
-                  {feedback.tags.map((tag) => (
-                    <Chip
-                      key={tag.id}
-                      label={tag.name}
-                      size="small"
-                      variant="outlined"
-                      sx={{ backgroundColor: "#f0f0f0" }}
-                    />
-                  ))}
-                </Stack>
-                <Button
+          feedbacks
+            .filter(
+              (f) =>
+                f.status === FeedbackStatus.PUBLIC || f.author.id === user?.id
+            )
+            .map((feedback) => {
+              return (
+                <Paper
                   variant="outlined"
-                  color="primary"
+                  key={feedback.id}
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    "&:hover": { boxShadow: 3, cursor: "pointer" },
+                    position: "relative",
+                  }}
                   onClick={() => {
-                    const accessToken = document.cookie
-                      .split("; ")
-                      .find((row) => row.startsWith("token="))
-                      ?.split("=")[1];
-                    if (!accessToken) router.push("/");
-
                     router.push(`/home/${feedback.id}`);
                   }}
-                  sx={{ mt: 2 }}
                 >
-                  View Comments
-                </Button>
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                  }}
-                >
-                  <Tooltip
-                    title={`${feedback.status}`}
-                    sx={{ mr: 1 }}
-                    onClick={async (e) => {
+                  <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                    <Avatar />
+                    <Box>
+                      <Typography variant="subtitle1">
+                        {feedback.author.username}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {feedback.author.email}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Typography variant="h6">{feedback.title}</Typography>
+                  <Typography variant="body2">
+                    {feedback.description}
+                  </Typography>
+                  <Stack direction="row" spacing={1} mt={1}>
+                    {feedback.tags.map((tag) => (
+                      <Chip
+                        key={tag.id}
+                        label={tag.name}
+                        size="small"
+                        variant="outlined"
+                        sx={{ backgroundColor: "#f0f0f0" }}
+                      />
+                    ))}
+                  </Stack>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={(e) => {
                       e.stopPropagation();
-                      if (feedback.author.id !== user.id) {
-                        return toast.error(
-                          "You cannot change the status of this feedback"
-                        );
+                      const accessToken = document.cookie
+                        .split("; ")
+                        .find((row) => row.startsWith("token="))
+                        ?.split("=")[1];
+
+                      if (!accessToken) {
+                        router.push("/");
+                        return;
                       }
-                      await dispatch(updateStatus(feedback.id));
+                    }}
+                    sx={{ mt: 2 }}
+                  >
+                    View Comments
+                  </Button>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 16,
+                      right: 16,
                     }}
                   >
-                    {feedback.status === FeedbackStatus.PRIVATE ? (
-                      <ShieldIcon />
-                    ) : (
-                      <RemoveModeratorIcon />
-                    )}
-                  </Tooltip>
-                  <Tooltip title="vote">
-                    <ThumbUpIcon
-                      sx={{
-                        color:
-                          feedback.votes &&
-                          feedback.votes.find(
-                            (vote) =>
-                              vote.user.id === user.id &&
-                              vote.type === VoteType.UPVOTE
-                          )
-                            ? "#1976d2"
-                            : "action.disabled",
-                        "&:hover": {
-                          scale: 1.1,
-                        },
-                      }}
+                    <Tooltip
+                      title={`${feedback.status}`}
+                      sx={{ mr: 1 }}
                       onClick={async (e) => {
                         e.stopPropagation();
-                        await dispatch(
-                          voteThunk({
-                            userId: user.id,
-                            feedbackId: feedback.id,
-                          })
-                        );
+                        if (feedback.author.id !== user?.id) {
+                          return toast.error(
+                            "You cannot change the status of this feedback"
+                          );
+                        }
+                        await dispatch(updateStatus(feedback.id));
                       }}
-                    />
-                  </Tooltip>
-                </Box>
-              </Paper>
-            );
-          })
+                    >
+                      {feedback.status === FeedbackStatus.PRIVATE ? (
+                        <ShieldIcon />
+                      ) : (
+                        <RemoveModeratorIcon />
+                      )}
+                    </Tooltip>
+                    <Tooltip title="vote">
+                      <ThumbUpIcon
+                        sx={{
+                          color:
+                            feedback.votes &&
+                            feedback.votes.find(
+                              (vote) =>
+                                vote.user.id === user?.id &&
+                                vote.type === VoteType.UPVOTE
+                            )
+                              ? "#1976d2"
+                              : "action.disabled",
+                          "&:hover": {
+                            scale: 1.1,
+                          },
+                        }}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (!user) {
+                            toast.error("You must be logged in to vote");
+                            return;
+                          }
+                          await dispatch(
+                            voteThunk({
+                              userId: user.id,
+                              feedbackId: feedback.id,
+                            })
+                          );
+                        }}
+                      />
+                    </Tooltip>
+                    <Typography variant="body2" sx={{ ml: 1 }}>
+                      {feedback.upvoteCount}
+                    </Typography>
+                  </Box>
+                </Paper>
+              );
+            })
         ) : (
           <Typography variant="body2">No feedback available</Typography>
         )}

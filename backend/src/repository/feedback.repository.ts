@@ -29,7 +29,14 @@ export class FeedbackRepository extends Repository<Feedback> {
       .leftJoinAndSelect('comments.replies', 'replies')
       .leftJoinAndSelect('replies.author', 'replyAuthor')
       .leftJoinAndSelect('feedback.votes', 'votes')
-      .leftJoinAndSelect('votes.user', 'voteUser');
+      .leftJoinAndSelect('votes.user', 'voteUser')
+      .loadRelationCountAndMap(
+        'feedback.upvoteCount',
+        'feedback.votes',
+        'votes',
+        (qb) =>
+          qb.andWhere('votes.type = :upvote', { upvote: VoteType.UPVOTE }),
+      );
 
     if (search) {
       qb.where(
@@ -51,7 +58,7 @@ export class FeedbackRepository extends Repository<Feedback> {
     }
 
     if (score) {
-      qb.orderBy('COUNT(votes.id)', score).addGroupBy('feedback.id');
+      qb.orderBy('feedback.upvoteCount', score);
     }
 
     if (limit) {

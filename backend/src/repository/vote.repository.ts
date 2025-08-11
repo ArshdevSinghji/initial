@@ -15,6 +15,7 @@ export class VoteRepository extends Repository<Vote> {
 
     const existingVote = await this.findOne({
       where: { user: { id: userId }, feedback: { id: feedbackId } },
+      relations: ['user', 'feedback'],
     });
 
     if (existingVote) {
@@ -22,7 +23,7 @@ export class VoteRepository extends Repository<Vote> {
         existingVote.type === VoteType.UPVOTE
           ? VoteType.DOWNVOTE
           : VoteType.UPVOTE;
-      return this.save(existingVote);
+      return await this.save(existingVote);
     }
 
     const newVote = this.create({

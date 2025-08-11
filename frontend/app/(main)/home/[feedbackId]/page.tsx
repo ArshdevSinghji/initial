@@ -28,7 +28,6 @@ const Feedback = () => {
   const { feedbacks } = useAppSelector((state) => state.feedback);
   const { user } = useAppSelector((state) => state.auth);
 
-  if (!user) return null;
   useEffect(() => {
     const findFeedbackById = async () => {
       if (feedbackId) {
@@ -44,10 +43,6 @@ const Feedback = () => {
     };
     findFeedbackById();
   }, [dispatch, feedbackId]);
-
-  // useEffect(() => {
-  //   console.log("Feedbacks updated:", feedbacks);
-  // }, [feedbacks]);
 
   return (
     <Container>
@@ -168,7 +163,7 @@ const Feedback = () => {
                       feedback.votes &&
                       feedback.votes.find(
                         (vote) =>
-                          vote.user.id === user.id &&
+                          vote.user.id === user?.id &&
                           vote.type === VoteType.UPVOTE
                       )
                         ? "#1976d2"
@@ -179,6 +174,10 @@ const Feedback = () => {
                   }}
                   onClick={async (e) => {
                     e.preventDefault();
+                    if (!user) {
+                      toast.error("You must be logged in to vote");
+                      return;
+                    }
                     await dispatch(
                       voteThunk({
                         userId: user.id,

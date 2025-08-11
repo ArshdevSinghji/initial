@@ -18,7 +18,7 @@ export class InitialCustomerData implements Seeder {
 
     const userData = [
       {
-        email: 'johnSnow@example.com',
+        email: 'johnSnow@gmail.com',
         username: 'John Snow',
         password: await bcrypt.hash('kingInTheNorth', 10),
         isAdmin: true,

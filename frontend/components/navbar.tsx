@@ -5,13 +5,10 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
-import AdbIcon from "@mui/icons-material/Adb";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hook";
 import { logout } from "@/redux/slice/auth.slice";
@@ -21,10 +18,16 @@ function Navbar() {
 
   const dispatch = useAppDispatch();
 
-  const accessToken = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
+  const [accessToken, setAccessToken] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+
+    setAccessToken(token || null);
+  }, []);
 
   return (
     <AppBar position="static">
@@ -49,7 +52,8 @@ function Navbar() {
                   onClick={() => {
                     document.cookie = "token=; Max-Age=0; path=/;";
                     dispatch(logout());
-                    window.location.reload();
+                    setAccessToken(null);
+                    // router.push("/");
                   }}
                 >
                   Logout

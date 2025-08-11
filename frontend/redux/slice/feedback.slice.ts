@@ -52,6 +52,7 @@ interface Feedback {
   isHidden: boolean;
   comments: Comment[];
   votes: Vote[];
+  upvoteCount: number;
 }
 
 interface FeedbackState {
@@ -84,27 +85,65 @@ const feedbackSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(voteThunk.fulfilled, (state, action) => {
-        const { feedbackId, userId, type } = action.payload;
-        const feedback = state.feedbacks.find((f) => f.id === feedbackId);
-        if (feedback) {
-          const existingVote = feedback.votes.find((v) => v.user.id === userId);
-          if (existingVote) {
-            existingVote.type = type;
+        const feedbackIndex = state.feedbacks.findIndex(
+          (f) => f.id === action.payload.feedback.id
+        );
+
+        if (feedbackIndex !== -1) {
+          const feedback = state.feedbacks[feedbackIndex];
+          const userId = action.payload.user.id;
+
+          const existingVoteIndex = feedback.votes.findIndex(
+            (vote) => vote.user.id === userId
+          );
+
+          if (existingVoteIndex !== -1) {
+            const existingVote = feedback.votes[existingVoteIndex];
+
+            if (existingVote.type === action.payload.type) {
+              feedback.votes.splice(existingVoteIndex, 1);
+              if (action.payload.type === VoteType.UPVOTE) {
+                feedback.upvoteCount -= 1;
+              } else {
+                feedback.upvoteCount += 1;
+              }
+            } else {
+              feedback.votes[existingVoteIndex] = {
+                id: action.payload.id,
+                type: action.payload.type,
+                user: {
+                  id: action.payload.user.id,
+                  username: action.payload.user.username,
+                  email: action.payload.user.email,
+                  isAdmin: action.payload.user.isAdmin,
+                  isDisabled: action.payload.user.isDisabled,
+                },
+              };
+              if (action.payload.type === VoteType.UPVOTE) {
+                feedback.upvoteCount += 1;
+              } else {
+                feedback.upvoteCount -= 1;
+              }
+            }
           } else {
             feedback.votes.push({
-              id: userId,
-              type,
+              id: action.payload.id,
+              type: action.payload.type,
               user: {
-                id: userId,
-                username: action.payload.username,
-                email: action.payload.email,
-                isAdmin: action.payload.isAdmin,
-                isDisabled: action.payload.isDisabled,
+                id: action.payload.user.id,
+                username: action.payload.user.username,
+                email: action.payload.user.email,
+                isAdmin: action.payload.user.isAdmin,
+                isDisabled: action.payload.user.isDisabled,
               },
             });
+            if (action.payload.type === VoteType.UPVOTE) {
+              feedback.upvoteCount += 1;
+            } else {
+              feedback.upvoteCount -= 1;
+            }
           }
         }
-        state.feedbacks = [...state.feedbacks];
         state.isLoading = false;
       })
       .addCase(voteThunk.pending, (state) => {
