@@ -77,7 +77,7 @@ const SignIn = () => {
       toast.error(`${result.payload.message}`);
     } else {
       toast.success("Successfully signed in!");
-      router.push("/home");
+      router.push("/");
     }
   };
 

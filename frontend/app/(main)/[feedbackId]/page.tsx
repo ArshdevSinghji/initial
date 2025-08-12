@@ -20,6 +20,7 @@ import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { VoteType } from "@/utils/enum";
 import { voteThunk } from "@/redux/thunk/vote.thunk";
+import { stringAvatar } from "@/style/style";
 
 const Feedback = () => {
   const { feedbackId } = useParams();
@@ -54,12 +55,14 @@ const Feedback = () => {
             sx={{
               mb: 2,
               p: 2,
-              "&:hover": { boxShadow: 3, cursor: "pointer" },
               position: "relative",
             }}
           >
             <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-              <Avatar />
+              <Avatar
+                {...stringAvatar(feedback.author.username)}
+                sizes="small"
+              />
               <Box>
                 <Typography variant="subtitle1">
                   {feedback.author.username}
@@ -78,7 +81,11 @@ const Feedback = () => {
                   label={tag.name}
                   size="small"
                   variant="outlined"
-                  sx={{ backgroundColor: "#f0f0f0" }}
+                  sx={{
+                    color: "#1976d2",
+                    borderColor: "#e3f2fd",
+                    backgroundColor: "#e3f2fd",
+                  }}
                 />
               ))}
             </Stack>
@@ -94,7 +101,7 @@ const Feedback = () => {
                     }}
                   >
                     <Stack direction="row" spacing={1}>
-                      <Avatar />
+                      <Avatar {...stringAvatar(comment.author.username)} />
                       <Box>
                         <Typography variant="subtitle2">
                           {comment.author.username}
@@ -120,7 +127,10 @@ const Feedback = () => {
                                     spacing={1}
                                     alignItems="center"
                                   >
-                                    <Avatar />
+                                    <Avatar
+                                      {...stringAvatar(reply.author.username)}
+                                      sizes="small"
+                                    />
                                     <Box>
                                       <Typography variant="subtitle2">
                                         {reply.author.username}

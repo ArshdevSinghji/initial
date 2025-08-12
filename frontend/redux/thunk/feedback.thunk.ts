@@ -13,7 +13,7 @@ export const findFeedbacks = createAsyncThunk(
       score?: "ASC" | "DESC";
       feedbackId?: number;
       limit?: number;
-      pageNumber?: number;
+      page?: number;
     },
     thunkAPI
   ) => {
@@ -26,7 +26,7 @@ export const findFeedbacks = createAsyncThunk(
           score: query.score,
           feedbackId: query.feedbackId,
           limit: query.limit || 10,
-          pageNumber: query.pageNumber || 1,
+          page: query.page || 1,
         },
         paramsSerializer: (params) =>
           qs.stringify(params, { arrayFormat: "repeat" }),

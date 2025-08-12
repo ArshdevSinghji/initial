@@ -53,7 +53,7 @@ function Navbar() {
                     document.cookie = "token=; Max-Age=0; path=/;";
                     dispatch(logout());
                     setAccessToken(null);
-                    // router.push("/");
+                    window.location.reload();
                   }}
                 >
                   Logout
@@ -63,7 +63,7 @@ function Navbar() {
               <Tooltip title="Login">
                 <Button
                   sx={{ color: "white" }}
-                  onClick={() => router.push("/")}
+                  onClick={() => router.push("/signIn")}
                 >
                   Login
                 </Button>

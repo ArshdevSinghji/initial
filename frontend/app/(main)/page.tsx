@@ -20,10 +20,11 @@ import {
 
 import debounce from "lodash/debounce";
 import SearchIcon from "@mui/icons-material/Search";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import AddFeedbackButton from "@/components/add-feedback-button";
 import ShieldIcon from "@mui/icons-material/Shield";
 import RemoveModeratorIcon from "@mui/icons-material/RemoveModerator";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
@@ -37,6 +38,8 @@ import { findUserThunk } from "@/redux/thunk/user.thunk";
 import { User } from "@/redux/slice/user.slice";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { stringAvatar } from "@/style/style";
+import SignInDialog from "@/components/signIn-dialog";
 
 const Home = () => {
   const router = useRouter();
@@ -46,6 +49,7 @@ const Home = () => {
   const [isLoadingDebounce, setIsLoadingDebounce] = useState(true);
   const [inputValue, setInputValue] = useState("");
   const [selectedUser, setSelectedUser] = useState<User[]>([]);
+  const [open, setOpen] = useState(false);
 
   const dispatch = useAppDispatch();
   const { feedbacks, count } = useAppSelector((state) => state.feedback);
@@ -73,12 +77,20 @@ const Home = () => {
       await dispatch(
         findFeedbacks({
           limit: 10,
-          pageNumber: page,
+          page: page,
         })
       );
     };
     fetchFeedbacks();
   }, [dispatch, page]);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const debouncedSearch = useMemo(
     () =>
@@ -87,7 +99,7 @@ const Home = () => {
           findFeedbacks({
             search: value,
             limit: 10,
-            pageNumber: page,
+            page: page,
           })
         );
       }, 500),
@@ -112,7 +124,7 @@ const Home = () => {
         tags: data.tags,
         author: filterConstraints.selectedUser,
         limit: 10,
-        pageNumber: page,
+        page: page,
       })
     );
     if (result.payload.statusCode === 400) {
@@ -277,7 +289,7 @@ const Home = () => {
               setInputValue("");
               setIsLoadingDebounce(true);
               setUsersOpen(false);
-              dispatch(findFeedbacks({ limit: 10, pageNumber: page }));
+              dispatch(findFeedbacks({ limit: 10, page: page }));
             }}
             sx={{ ml: 2, mt: 2 }}
           >
@@ -305,54 +317,177 @@ const Home = () => {
                     position: "relative",
                   }}
                   onClick={() => {
-                    router.push(`/home/${feedback.id}`);
+                    router.push(`/${feedback.id}`);
                   }}
                 >
-                  <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                    <Avatar />
-                    <Box>
-                      <Typography variant="subtitle1">
-                        {feedback.author.username}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {feedback.author.email}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                  <Typography variant="h6">{feedback.title}</Typography>
-                  <Typography variant="body2">
-                    {feedback.description}
-                  </Typography>
-                  <Stack direction="row" spacing={1} mt={1}>
-                    {feedback.tags.map((tag) => (
-                      <Chip
-                        key={tag.id}
-                        label={tag.name}
-                        size="small"
-                        variant="outlined"
-                        sx={{ backgroundColor: "#f0f0f0" }}
-                      />
-                    ))}
-                  </Stack>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const accessToken = document.cookie
-                        .split("; ")
-                        .find((row) => row.startsWith("token="))
-                        ?.split("=")[1];
+                  <Stack direction="row" alignItems="center">
+                    <Stack justifyContent="center" alignItems="center" mr={1}>
+                      <KeyboardArrowUpIcon
+                        sx={{
+                          fontSize: 50,
+                          color:
+                            feedback.votes &&
+                            feedback.votes.find(
+                              (vote) =>
+                                vote.user.id === user?.id &&
+                                vote.type === VoteType.UPVOTE
+                            )
+                              ? "#1976d2"
+                              : "action.disabled",
+                          "&:hover": {
+                            scale: 1.1,
+                          },
+                        }}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const accessToken = document.cookie
+                            .split("; ")
+                            .find((row) => row.startsWith("token="))
+                            ?.split("=")[1];
 
-                      if (!accessToken) {
-                        router.push("/");
-                        return;
-                      }
-                    }}
-                    sx={{ mt: 2 }}
-                  >
-                    View Comments
-                  </Button>
+                          if (!accessToken) {
+                            handleOpen();
+                            return;
+                          }
+                          if (!user) {
+                            toast.error("You must be logged in to vote");
+                            return;
+                          }
+                          await dispatch(
+                            voteThunk({
+                              userId: user.id,
+                              feedbackId: feedback.id,
+                            })
+                          );
+                          toast("Upvoted!");
+                        }}
+                      />
+                      <Typography variant="h6">
+                        {feedback.upvoteCount}
+                      </Typography>
+                      <KeyboardArrowDownIcon
+                        sx={{
+                          fontSize: 50,
+                          "&:hover": { scale: 1.1 },
+                          color:
+                            feedback.votes &&
+                            feedback.votes.find(
+                              (vote) =>
+                                vote.user.id === user?.id &&
+                                vote.type === VoteType.DOWNVOTE
+                            )
+                              ? "#1976d2"
+                              : "action.disabled",
+                        }}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const accessToken = document.cookie
+                            .split("; ")
+                            .find((row) => row.startsWith("token="))
+                            ?.split("=")[1];
+
+                          if (!accessToken) {
+                            handleOpen();
+                            return;
+                          }
+                          if (!user) {
+                            toast.error("You must be logged in to vote");
+                            return;
+                          }
+
+                          await dispatch(
+                            voteThunk({
+                              userId: user.id,
+                              feedbackId: feedback.id,
+                            })
+                          );
+
+                          toast("Downvoted!");
+                        }}
+                      />
+                    </Stack>
+                    <Stack>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                        mb={1}
+                      >
+                        <Avatar
+                          {...stringAvatar(feedback.author.username)}
+                          sizes="small"
+                        />
+                        <Box>
+                          <Typography variant="subtitle1">
+                            {feedback.author.username}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {feedback.author.email}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                      <Typography variant="h6">{feedback.title}</Typography>
+                      <Typography variant="body2">
+                        {feedback.description}
+                      </Typography>
+                      <Stack direction="row" spacing={1} mt={1}>
+                        {feedback.tags.map((tag) => (
+                          <Chip
+                            key={tag.id}
+                            label={tag.name}
+                            size="small"
+                            variant="outlined"
+                            sx={{
+                              color: "#1976d2",
+                              borderColor: "#e3f2fd",
+                              backgroundColor: "#e3f2fd",
+                            }}
+                          />
+                        ))}
+                      </Stack>
+                    </Stack>
+                  </Stack>
+                  <Stack direction={"row-reverse"}>
+                    <Button
+                      variant="text"
+                      color="primary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const accessToken = document.cookie
+                          .split("; ")
+                          .find((row) => row.startsWith("token="))
+                          ?.split("=")[1];
+
+                        if (!accessToken) {
+                          handleOpen();
+                          return;
+                        }
+                      }}
+                    >
+                      View Comments
+                    </Button>
+                    <Button
+                      variant="text"
+                      color="primary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const accessToken = document.cookie
+                          .split("; ")
+                          .find((row) => row.startsWith("token="))
+                          ?.split("=")[1];
+
+                        if (!accessToken) {
+                          handleOpen();
+                          return;
+                        }
+                      }}
+                    >
+                      Add Comments
+                    </Button>
+                  </Stack>
+
                   <Box
                     sx={{
                       position: "absolute",
@@ -379,40 +514,6 @@ const Home = () => {
                         <RemoveModeratorIcon />
                       )}
                     </Tooltip>
-                    <Tooltip title="vote">
-                      <ThumbUpIcon
-                        sx={{
-                          color:
-                            feedback.votes &&
-                            feedback.votes.find(
-                              (vote) =>
-                                vote.user.id === user?.id &&
-                                vote.type === VoteType.UPVOTE
-                            )
-                              ? "#1976d2"
-                              : "action.disabled",
-                          "&:hover": {
-                            scale: 1.1,
-                          },
-                        }}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          if (!user) {
-                            toast.error("You must be logged in to vote");
-                            return;
-                          }
-                          await dispatch(
-                            voteThunk({
-                              userId: user.id,
-                              feedbackId: feedback.id,
-                            })
-                          );
-                        }}
-                      />
-                    </Tooltip>
-                    <Typography variant="body2" sx={{ ml: 1 }}>
-                      {feedback.upvoteCount}
-                    </Typography>
                   </Box>
                 </Paper>
               );
@@ -432,6 +533,7 @@ const Home = () => {
         sx={{ float: "right", marginTop: "20px" }}
       />
       <AddFeedbackButton />
+      <SignInDialog open={open} handleClose={handleClose} />
     </Container>
   );
 };
