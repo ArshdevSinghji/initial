@@ -48,3 +48,9 @@ export const FilterSchema = z.object({
 });
 
 export type ZFilterSchema = z.infer<typeof FilterSchema>;
+
+export const CommentSchema = z.object({
+  content: z.string().trim().nonempty("content is required!"),
+});
+
+export type ZCommentSchema = z.infer<typeof CommentSchema>;

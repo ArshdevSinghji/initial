@@ -22,10 +22,12 @@ export class FeedbackRepository extends Repository<Feedback> {
     const qb = this.createQueryBuilder('feedback')
       .leftJoinAndSelect('feedback.author', 'author')
       .leftJoinAndSelect('feedback.tags', 'tags')
-      .leftJoinAndSelect('feedback.comments', 'comments')
+      .leftJoinAndSelect(
+        'feedback.comments',
+        'comments',
+        'comments.parent IS NULL',
+      )
       .leftJoinAndSelect('comments.author', 'commentAuthor')
-      .leftJoinAndSelect('comments.feedback', 'commentFeedback')
-      .leftJoinAndSelect('comments.parent', 'parentComment')
       .leftJoinAndSelect('comments.replies', 'replies')
       .leftJoinAndSelect('replies.author', 'replyAuthor')
       .leftJoinAndSelect('feedback.votes', 'votes')

@@ -17,7 +17,10 @@ import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { toast } from "sonner";
 import { FeedbackSchema, ZFeedbackSchema } from "@/utils/zod";
 import { FeedbackStatus } from "@/utils/enum copy";
-import { createFeedbackThunk } from "@/redux/thunk/feedback.thunk";
+import {
+  createFeedbackThunk,
+  findFeedbacks,
+} from "@/redux/thunk/feedback.thunk";
 
 const AddFeedbackDialog: React.FC<{
   open: boolean;
@@ -60,11 +63,10 @@ const AddFeedbackDialog: React.FC<{
       toast.error(`${result.payload.message}`);
     } else {
       toast.success("Successfully created feedback!");
+      await dispatch(findFeedbacks({}));
       handleClose();
     }
     reset();
-    toast.success("Feedback submitted successfully!");
-    handleClose();
   };
 
   return (

@@ -13,21 +13,32 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
 import { useParams } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { VoteType } from "@/utils/enum";
-import { voteThunk } from "@/redux/thunk/vote.thunk";
 import { stringAvatar } from "@/style/style";
+
+import CommentBox from "@/components/comment-box";
+import ReplyIcon from "@mui/icons-material/Reply";
 
 const Feedback = () => {
   const { feedbackId } = useParams();
 
+  const [parentId, setParentId] = useState<number>();
+  const [open, setOpen] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+
   const dispatch = useAppDispatch();
   const { feedbacks } = useAppSelector((state) => state.feedback);
-  const { user } = useAppSelector((state) => state.auth);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     const findFeedbackById = async () => {
@@ -46,7 +57,7 @@ const Feedback = () => {
   }, [dispatch, feedbackId]);
 
   return (
-    <Container>
+    <Container sx={{ my: 2 }}>
       {feedbacks.length > 0 ? (
         feedbacks.map((feedback) => (
           <Paper
@@ -98,8 +109,25 @@ const Feedback = () => {
                       border: "1px solid #ccc",
                       padding: 1,
                       borderRadius: 1,
+                      position: "relative",
                     }}
                   >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 16,
+                        right: 16,
+                      }}
+                      onClick={() => {
+                        setMessage(`Replying to: ${comment.author.username}`);
+                        setParentId(comment.id);
+                        handleOpen();
+                      }}
+                    >
+                      <Tooltip title="reply" arrow>
+                        <ReplyIcon />
+                      </Tooltip>
+                    </Box>
                     <Stack direction="row" spacing={1}>
                       <Avatar {...stringAvatar(comment.author.username)} />
                       <Box>
@@ -135,7 +163,10 @@ const Feedback = () => {
                                       <Typography variant="subtitle2">
                                         {reply.author.username}
                                       </Typography>
-                                      <Typography variant="body2">
+                                      <Typography
+                                        variant="body2"
+                                        color="textSecondary"
+                                      >
                                         {reply.content}
                                       </Typography>
                                     </Box>
@@ -147,14 +178,6 @@ const Feedback = () => {
                         )}
                       </Box>
                     </Stack>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="error"
-                      sx={{ mt: 2, float: "right" }}
-                    >
-                      Add Reply
-                    </Button>
                   </Box>
                 );
               })}
@@ -165,42 +188,22 @@ const Feedback = () => {
                 top: 16,
                 right: 16,
               }}
+              onClick={() => {
+                setMessage("Replying to feedback");
+                setParentId(feedback.id);
+                handleOpen();
+              }}
             >
-              <Tooltip title="vote">
-                <ThumbUpIcon
-                  sx={{
-                    color:
-                      feedback.votes &&
-                      feedback.votes.find(
-                        (vote) =>
-                          vote.user.id === user?.id &&
-                          vote.type === VoteType.UPVOTE
-                      )
-                        ? "#1976d2"
-                        : "action.disabled",
-                    "&:hover": {
-                      scale: 1.1,
-                    },
-                  }}
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (!user) {
-                      toast.error("You must be logged in to vote");
-                      return;
-                    }
-                    await dispatch(
-                      voteThunk({
-                        userId: user.id,
-                        feedbackId: feedback.id,
-                      })
-                    );
-                  }}
-                />
+              <Tooltip title="reply" arrow>
+                <ReplyIcon />
               </Tooltip>
             </Box>
-            <Button variant="outlined" size="small" sx={{ mt: 2 }}>
-              Add Comments
-            </Button>
+            <CommentBox
+              open={open}
+              handleClose={handleClose}
+              parentId={parentId}
+              message={message}
+            />
           </Paper>
         ))
       ) : (

@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { stringAvatar } from "@/style/style";
 import SignInDialog from "@/components/signIn-dialog";
+import CommentBox from "@/components/comment-box";
 
 const Home = () => {
   const router = useRouter();
@@ -50,6 +51,8 @@ const Home = () => {
   const [inputValue, setInputValue] = useState("");
   const [selectedUser, setSelectedUser] = useState<User[]>([]);
   const [open, setOpen] = useState(false);
+  const [commentBoxOpen, setCommentBoxOpen] = useState(false);
+  const [parentId, setParentId] = useState<number>();
 
   const dispatch = useAppDispatch();
   const { feedbacks, count } = useAppSelector((state) => state.feedback);
@@ -90,6 +93,10 @@ const Home = () => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleCloseCommentBox = () => {
+    setCommentBoxOpen(false);
   };
 
   const debouncedSearch = useMemo(
@@ -316,9 +323,6 @@ const Home = () => {
                     "&:hover": { boxShadow: 3, cursor: "pointer" },
                     position: "relative",
                   }}
-                  onClick={() => {
-                    router.push(`/${feedback.id}`);
-                  }}
                 >
                   <Stack direction="row" alignItems="center">
                     <Stack justifyContent="center" alignItems="center" mr={1}>
@@ -463,6 +467,7 @@ const Home = () => {
                           handleOpen();
                           return;
                         }
+                        router.push(`/${feedback.id}`);
                       }}
                     >
                       View Comments
@@ -482,11 +487,21 @@ const Home = () => {
                           handleOpen();
                           return;
                         }
+
+                        setCommentBoxOpen(true);
+                        setParentId(feedback.id);
                       }}
                     >
                       Add Comments
                     </Button>
                   </Stack>
+
+                  <CommentBox
+                    open={commentBoxOpen}
+                    handleClose={handleCloseCommentBox}
+                    parentId={parentId}
+                    message="Adding comment to feedback"
+                  />
 
                   <Box
                     sx={{

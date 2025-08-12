@@ -54,6 +54,9 @@ function stringToColor(string: string) {
 }
 
 export function stringAvatar(name: string) {
+  if (typeof name !== "string" || !name.trim()) {
+    name = "Unknown User";
+  }
   return {
     sx: {
       bgcolor: stringToColor(name),

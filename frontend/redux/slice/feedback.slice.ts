@@ -173,25 +173,26 @@ const feedbackSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(commentThunk.fulfilled, (state, action) => {
-        const feedback = state.feedbacks.find(
-          (f) => f.id === action.payload.feedbackId
+        const feedbackIndex = state.feedbacks.findIndex(
+          (f) => f.id === action.payload.feedback.id
         );
-        if (feedback) {
-          feedback.comments.push({
-            id: action.payload.id,
-            content: action.payload.content,
-            author: {
-              id: action.payload.userId,
-              username: action.payload.username,
-              email: action.payload.email,
-              isAdmin: action.payload.isAdmin,
-              isDisabled: action.payload.isDisabled,
-            },
-            feedback: feedback,
-            replies: [],
-            authorId: action.payload.userId,
-          });
+        if (feedbackIndex === -1) {
+          state.isLoading = false;
+          return;
         }
+        if (action.payload.parent) {
+          const commentIndex = state.feedbacks[
+            feedbackIndex
+          ].comments.findIndex((c) => c.id === action.payload.parent.id);
+          if (commentIndex !== -1) {
+            state.feedbacks[feedbackIndex].comments[commentIndex].replies.push(
+              action.payload
+            );
+          }
+        } else {
+          state.feedbacks[feedbackIndex].comments.push(action.payload);
+        }
+        state.isLoading = false;
       })
       .addCase(commentThunk.pending, (state) => {
         state.isLoading = true;

@@ -11,7 +11,7 @@ export const commentThunk = createAsyncThunk(
   "feedback/commentFeedback",
   async (payload: CommentPayload, thunkAPI) => {
     try {
-      const res = await axiosInstance.patch(`/comment`, payload);
+      const res = await axiosInstance.post(`/comment`, payload);
       return res.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
